@@ -1,0 +1,8 @@
+
+table.display-woocommerce-orders {
+    width: 100% !important;
+}
+
+div.container.display-woocommerce-orders {
+    overflow-x: auto !important;
+}

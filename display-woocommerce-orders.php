@@ -39,6 +39,10 @@ function joinment_get_wc_products_array() {
  * @return type
  */
 function joinment_get_wc_checkout_fields() {
+
+    //Empty the cart to trigger empty cart condition
+    WC()->cart->empty_cart(); 
+    
     /*
      * First lets start the session. You cant use here WC_Session directly
      * because it's an abstract class. But you can use WC_Session_Handler which
@@ -71,6 +75,9 @@ function joinment_display_wc_shortcode($atts) {
         'product-id' => 0,
         'field-slugs' => 'name'
             ), $atts);
+
+    //Replace double spaces with a single space
+    $a['field-slugs'] = str_replace('  ', ' ', $a['field-slugs']);
 
     // Replace space and comma with just comma
     $a['field-slugs'] = str_replace(', ', ',', $a['field-slugs']);
@@ -148,16 +155,29 @@ function joinment_display_wc_shortcode($atts) {
 
                         //If selected field is equal to data
                         if ($data["key"] == $field_slug) {
-                            $data_values[$field_slug] = $data["value"];
+                            //Add data value to array
+                            $data_values[$field_slug] = (string) $data["value"];
                             break;
                         }
                     }
                 }
 
+                //Debug
+                /* print_r($a['field-slugs']);
+                  echo("<hr>");
+                  print_r($data_values);
+                  echo("<hr>");
+                  print_r($checkout_fields); */
+
                 //Rerun different loop to show cells in order
                 foreach ($a['field-slugs'] as $field_slug) {
+
+                    //If field is not empty
                     if (array_key_exists($field_slug, $data_values)) {
-                        echo("<td>" . $data_values[$field_slug] . "</td>");
+                        //If this checkout field exists
+                        if (array_key_exists($field_slug, $checkout_fields)) {
+                            echo("<td>" . $data_values[$field_slug] . "</td>");
+                        }
                     } else {
                         echo("<td></td>");
                     }

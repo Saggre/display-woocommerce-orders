@@ -38,7 +38,7 @@ function joinment_get_wc_products_array() {
  * Get "order" WooCommerce checkout fields
  * @return type
  */
-function joinment_get_wc_checkout_fields() {
+function joinment_get_wc_checkout_fields($checkout_fields) {
 
     //Empty the cart to trigger empty cart condition
     WC()->cart->empty_cart();
@@ -58,7 +58,10 @@ function joinment_get_wc_checkout_fields() {
      */
     WC()->customer = new WC_Customer;
 
-    return WC()->checkout->checkout_fields["order"];
+    //Used to find checkout fields
+    //print_r(WC()->checkout->checkout_fields);
+
+    return WC()->checkout->checkout_fields[$checkout_fields];
 }
 
 // Create the shortcode
@@ -74,7 +77,8 @@ function joinment_display_wc_shortcode($atts) {
     $a = shortcode_atts(array(
         'product-id' => 0,
         'field-slugs' => "name",
-        'show-title' => "true"
+        'show-title' => "true",
+        'checkout-fields' => "order"
             ), $atts);
 
     //Replace double spaces with a single space
@@ -115,7 +119,7 @@ function joinment_display_wc_shortcode($atts) {
     ));
 
     //Get checkout fields
-    $checkout_fields = joinment_get_wc_checkout_fields();
+    $checkout_fields = joinment_get_wc_checkout_fields($a['checkout-fields']);
 
     echo("<tr>");
 

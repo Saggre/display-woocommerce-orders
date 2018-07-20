@@ -72,6 +72,7 @@ add_shortcode('display-woocommerce-orders', 'joinment_display_wc_shortcode');
  * @param type $atts
  */
 function joinment_display_wc_shortcode($atts) {
+    ob_start();
 
     //Default atts
     $a = shortcode_atts(array(
@@ -206,4 +207,6 @@ function joinment_display_wc_shortcode($atts) {
 
     echo('</table>');
     echo('</div>');
+
+    return ob_get_clean();
 }

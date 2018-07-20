@@ -76,6 +76,7 @@ function joinment_display_wc_shortcode($atts) {
     //Default atts
     $a = shortcode_atts(array(
         'product-id' => 0,
+        'variation-id' => 0,
         'field-slugs' => "name",
         'show-title' => "true",
         'checkout-fields' => "order"
@@ -144,56 +145,61 @@ function joinment_display_wc_shortcode($atts) {
         // For each product in order
         foreach ($order->get_items() as $product) {
 
-            //If this order contains the selected product
-            if ($product["product_id"] == $a['product-id']) {
 
-                echo("<tr>");
+            // Targeting only product variation items from variation-id
+            if ($a['variation-id'] == 0 || $product->get_variation_id() == $a['variation-id']) {
 
-                // The order data
-                $order_meta_data = $order->get_meta_data();
+                //If this order contains the selected product
+                if ($product["product_id"] == $a['product-id']) {
 
-                $data_values = array();
+                    echo("<tr>");
 
-                //For each data
-                foreach ($order_meta_data as $order_data) {
-                    $data = $order_data->get_data();
+                    // The order data
+                    $order_meta_data = $order->get_meta_data();
 
-                    //For each selected field
+                    $data_values = array();
+
+                    //For each data
+                    foreach ($order_meta_data as $order_data) {
+                        $data = $order_data->get_data();
+
+                        //For each selected field
+                        foreach ($a['field-slugs'] as $field_slug) {
+
+                            //If selected field is equal to data
+                            if ($data["key"] == $field_slug) {
+                                //Add data value to array
+                                $data_values[$field_slug] = (string) $data["value"];
+                                break;
+                            }
+                        }
+                    }
+
+                    //Debug
+                    /* print_r($a['field-slugs']);
+                      echo("<hr>");
+                      print_r($data_values);
+                      echo("<hr>");
+                      print_r($checkout_fields); */
+
+                    //Rerun different loop to show cells in order
                     foreach ($a['field-slugs'] as $field_slug) {
 
-                        //If selected field is equal to data
-                        if ($data["key"] == $field_slug) {
-                            //Add data value to array
-                            $data_values[$field_slug] = (string) $data["value"];
-                            break;
+                        //If field exists
+                        if (array_key_exists($field_slug, $checkout_fields)) {
+                            //If field has a value
+                            if (array_key_exists($field_slug, $data_values)) {
+                                echo("<td>" . $data_values[$field_slug] . "</td>");
+                            } else {
+                                echo("<td></td>");
+                            }
                         }
                     }
+
+
+
+                    echo("</tr>");
                 }
-
-                //Debug
-                /* print_r($a['field-slugs']);
-                  echo("<hr>");
-                  print_r($data_values);
-                  echo("<hr>");
-                  print_r($checkout_fields); */
-
-                //Rerun different loop to show cells in order
-                foreach ($a['field-slugs'] as $field_slug) {
-
-                    //If field exists
-                    if (array_key_exists($field_slug, $checkout_fields)) {
-                        //If field has a value
-                        if (array_key_exists($field_slug, $data_values)) {
-                            echo("<td>" . $data_values[$field_slug] . "</td>");
-                        } else {
-                            echo("<td></td>");
-                        }
-                    }
-                }
-
-
-
-                echo("</tr>");
             }
         }
     }

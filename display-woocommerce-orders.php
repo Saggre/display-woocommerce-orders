@@ -2,13 +2,14 @@
 
 /**
  * Plugin Name: Display WooCommerce Orders
- * Description: Display a list of WooCommerce ordres
- * Version: 0.0.1
+ * Description: Display a list of WooCommerce orders
+ * Version: 0.0.2
  * Author: Sakri Koskimies
  */
 add_action('wp_enqueue_scripts', 'joinment_display_wc_scripts');
 
-function joinment_display_wc_scripts() {
+function joinment_display_wc_scripts()
+{
     wp_register_style('display-woocommerce-orders', plugins_url('/style/display-woocommerce-orders.css', __FILE__));
     wp_enqueue_style('display-woocommerce-orders');
 }
@@ -17,7 +18,8 @@ function joinment_display_wc_scripts() {
  * Get each WooCommerce product
  * @return array
  */
-function joinment_get_wc_products_array() {
+function joinment_get_wc_products_array()
+{
     $db_products = get_posts(array(
         'numberposts' => -1,
         'post_type' => 'product'
@@ -38,7 +40,8 @@ function joinment_get_wc_products_array() {
  * Get "order" WooCommerce checkout fields
  * @return type
  */
-function joinment_get_wc_checkout_fields($checkout_fields) {
+function joinment_get_wc_checkout_fields($checkout_fields)
+{
 
     //Empty the cart to trigger empty cart condition
     WC()->cart->empty_cart();
@@ -71,7 +74,8 @@ add_shortcode('display-woocommerce-orders', 'joinment_display_wc_shortcode');
  * This function creates the shortcode
  * @param type $atts
  */
-function joinment_display_wc_shortcode($atts) {
+function joinment_display_wc_shortcode($atts)
+{
     ob_start();
 
     //Default atts
@@ -80,8 +84,16 @@ function joinment_display_wc_shortcode($atts) {
         'variation-id' => 0,
         'field-slugs' => "name",
         'show-title' => "true",
-        'checkout-fields' => "order"
-            ), $atts);
+        'checkout-fields' => "order",
+        'after-date' => null,
+    ), $atts);
+
+    $cutoff_date = null;
+    try {
+        $cutoff_date = isset($a['after-date']) ? date("Y-m-d", strtotime($a['after-date'])) : null;
+    } catch (Exception $e) {
+
+    }
 
     //Replace double spaces with a single space
     $a['field-slugs'] = str_replace('  ', ' ', $a['field-slugs']);
@@ -143,9 +155,15 @@ function joinment_display_wc_shortcode($atts) {
         // Getting an instance of the WC order object
         $order = wc_get_order($order_id);
 
+        $order_date = $order->get_date_created();
+
+        // Ignore order if it's older than cutoff date
+        if (isset($cutoff_date) && isset($order_date) && $order_date < $cutoff_date) {
+            continue;
+        }
+
         // For each product in order
         foreach ($order->get_items() as $product) {
-
 
             // Targeting only product variation items from variation-id
             if ($a['variation-id'] == 0 || $product->get_variation_id() == $a['variation-id']) {
@@ -170,7 +188,7 @@ function joinment_display_wc_shortcode($atts) {
                             //If selected field is equal to data
                             if ($data["key"] == $field_slug) {
                                 //Add data value to array
-                                $data_values[$field_slug] = (string) $data["value"];
+                                $data_values[$field_slug] = (string)$data["value"];
                                 break;
                             }
                         }
@@ -196,7 +214,6 @@ function joinment_display_wc_shortcode($atts) {
                             }
                         }
                     }
-
 
 
                     echo("</tr>");

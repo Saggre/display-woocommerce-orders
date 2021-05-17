@@ -107,6 +107,11 @@ class Display_WC_Orders {
 	private static function get_orders_containing_product( $product_id ) {
 		global $wpdb;
 
+		// Sanity check.
+		if ( ! is_numeric( $product_id ) ) {
+			return array();
+		}
+
 		$results = $wpdb->get_col( "
         SELECT order_items.order_id
         FROM {$wpdb->prefix}woocommerce_order_items as order_items

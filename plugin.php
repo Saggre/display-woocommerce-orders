@@ -70,7 +70,7 @@ class Display_WC_Orders {
 				$meta  = trim( $meta );
 				$value = $order->get_meta( $meta );
 
-				printf( '<td>%s</td>', $value );
+				printf( '<td>%s</td>', esc_html( $value ) );
 			}
 
 			echo '</tr>';
@@ -91,7 +91,7 @@ class Display_WC_Orders {
 		echo '<tr>';
 
 		foreach ( $titles as $title ) {
-			printf( '<th>%s</th>', trim( $title ) );
+			printf( '<th>%s</th>', esc_html( trim( $title ) ) );
 		}
 
 		echo '</tr>';

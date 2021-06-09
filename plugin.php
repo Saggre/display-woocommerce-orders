@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Display WooCommerce Orders
  * Description: Display order meta in a table from orders containing a certain product
- * Version: 0.1.0
+ * Version: 0.1.1
  * Author: Sakri Koskimies
  */
 
@@ -60,7 +60,13 @@ class Display_WC_Orders {
 		foreach ( $order_ids as $order_id ) {
 			$order = wc_get_order( $order_id );
 
-			if ( empty( $order ) || $order->get_date_completed()->getTimestamp() < $after ) {
+			if ( empty( $order ) || ! $order->has_status( 'completed' ) ) {
+				continue;
+			}
+
+			$completed = $order->get_date_completed();
+
+			if ( empty( $completed ) || $completed->getTimestamp() < $after ) {
 				continue;
 			}
 
